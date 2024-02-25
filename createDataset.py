@@ -8,8 +8,8 @@ import pickle
 from pydub import AudioSegment
 import re
 
-sound_file = AudioSegment.from_mp3("assets/audio/Hades_voice_line_Athena.mp3")
-train = pd.read_csv('Hades_voice_line_Athena.tsv', names=['start',	'end',	'text'], skiprows=1, sep='\t')
+sound_file = AudioSegment.from_mp3("sample/audio/Hades_voice_line_Athena.mp3")
+train = pd.read_csv('sample/audio/Hades_voice_line_Athena.tsv', names=['start',	'end',	'text'], skiprows=1, sep='\t')
 train["text"] = train['text'].str.replace('[^\w\s]','')
 print(train.head())
 index = 0
@@ -18,14 +18,20 @@ for _, row in tqdm(train.iterrows()):
     start = int(row.start)
     end = int(row.end)
     audio = sound_file[start:end]
-    audio.export(
-        "/mnt/d/Data/Athena_voice/audio/chunk{0}.wav".format(index),
-        bitrate = "63k",
-        format = "wav"
+    mono_audio = audio.split_to_mono()
+    if len(mono_audio) > 1:
+        mono_audio = mono_audio[0]
+    mono_audio = mono_audio.set_frame_rate(22050)
+    mono_audio.export(
+        "/mnt/d/Data/Athena_voice/wavs/audio{0}.wav".format(index),
+        bitrate = "16k", format = "wav"
     )
-    res = re.sub(r'[^\w\s]', '', row.text)
+
+    # res = re.sub(r'[^\w\s]', '', row.text)
+    res = row.text
     all_data.append({
-        "audio": "chunk{0}.wav".format(index),
+        "audio": "audio{0}".format(index),
+        "raw": res,
         "text": res,
     })
     index += 1

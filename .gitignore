@@ -1,1 +1,5 @@
 sample
+glow-tts-finetune-*
+models/*
+phoneme_cache
+*.wav
